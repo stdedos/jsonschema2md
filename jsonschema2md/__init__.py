@@ -68,7 +68,15 @@ class Parser:
 
         if "description" in obj:
             ending = "" if re.search(r"[.?!;]$", obj["description"]) else "."
-            description_line.append(f"{obj['description']}{ending}")
+            description_str = obj["description"]
+
+            if "\n" in obj["description"]:
+                description_str = "\n".join(
+                    line if line.strip() == "" else f"{' ' * self.tab_size}{line}"
+                    for line in obj["description"].split("\n")
+                ).strip()
+
+            description_line.append(f"{description_str}{ending}")
         if add_type:
             if "type" in obj:
                 description_line.append(f"Must be of type *{obj['type']}*.")

@@ -49,6 +49,8 @@ class TestParser:
     }
 
     def test_construct_description_line(self):
+        parser = jsonschema2md.Parser()
+
         test_cases = [
             {"input": {}, "add_type": False, "expected_output": ""},
             {
@@ -169,9 +171,23 @@ class TestParser:
                     'Default: `["Carrot", "Mushroom", "Cabbage", "Broccoli", "Leek"]`.'
                 ),
             },
+            {
+                "input": {
+                    "description": "Shorthand for\n```yaml\n  main: |\n    reveal_type({{ reveal_type }})\n```\nMust be a syntactically valid Python expression.\n",
+                    "examples": ["1", 1, True, "sys.version_info"],
+                },
+                "add_type": False,
+                "expected_output": (
+                    ": Shorthand for\n"
+                    f'{" " * parser.tab_size}```yaml\n'
+                    f'{" " * parser.tab_size}  main: |\n'
+                    f'{" " * parser.tab_size}'
+                    "    reveal_type({{ reveal_type }})\n"
+                    f'{" " * parser.tab_size}```\n'
+                    f'{" " * parser.tab_size}Must be a syntactically valid Python expression.'
+                ),
+            },
         ]
-
-        parser = jsonschema2md.Parser()
 
         for case in test_cases:
             observed_output = " ".join(
