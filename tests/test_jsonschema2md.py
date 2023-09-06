@@ -174,6 +174,21 @@ class TestParser:
                     'Default: `["Carrot", "Mushroom", "Cabbage", "Broccoli", "Leek"]`.'
                 ),
             },
+            {
+                "input": {
+                    "description": "Shorthand for\n```yaml\n  main: |\n    reveal_type({{ reveal_type }})\n```\nMust be a syntactically valid Python expression.\n",
+                    "examples": ["1", 1, True, "sys.version_info"],
+                },
+                "add_type": False,
+                "expected_output": (
+                    ': Shorthand for\n'
+                    '  ```yaml\n'
+                    '    main: |\n'
+                    '      reveal_type({{ reveal_type }})\n'
+                    '  ```\n'
+                    '  Must be a syntactically valid Python expression.\n'
+                ),
+            },
         ]
 
         parser = jsonschema2md.Parser()

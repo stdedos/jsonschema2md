@@ -180,6 +180,11 @@ class Parser:
             )
         )
 
+        if len(description_line) == 2:
+            description_line[1] = f"\n{indentation_items}".join(
+                description_line[1].split("\n")
+            ).strip()
+
         # Add full line to output
         description_line = " ".join(description_line)
         optional_format = f", format: {obj['format']}" if "format" in obj else ""
