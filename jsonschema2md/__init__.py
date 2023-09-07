@@ -62,6 +62,25 @@ class Parser:
                 f"`{valid_show_examples_options}`; `{show_examples}` was passed."
             )
 
+    def _handle_code_blocks(self, text: List[str], indent: str) -> List[str]:
+        """Carefully split \n\n around ```'s"""
+        description_line = []
+
+        for line in text:
+            double_newline_split = re.split(r"(?<!```)\n\n", line)
+            inner_list = []
+
+            for inner_line in double_newline_split:
+                joined_inner_line = f"{indent}```\n\n{indent}".join(
+                    re.split(r"^ +```\n\n", inner_line, flags=re.MULTILINE)
+                )
+                inner_list.append(joined_inner_line)
+
+            joined_line = f"<br>\n{indent}".join(inner_list)
+            description_line.append(joined_line)
+
+        return description_line
+
     def _construct_description_line(self, obj: Dict, add_type: bool = False) -> Sequence[str]:
         """Construct description line of property, definition, or item."""
         description_line = []
@@ -73,7 +92,7 @@ class Parser:
             if "\n" in obj["description"]:
                 description_str = "\n".join(
                     line if line.strip() == "" else f"{' ' * self.tab_size}{line}"
-                    for line in obj["description"].split("\n")
+                    for line in re.split(r"(?<!\n)\n(?!\n)", obj["description"])
                 ).strip()
 
             description_line.append(f"{description_str}{ending}")
@@ -180,12 +199,12 @@ class Parser:
 
         # Construct full description line
         description_line_base = self._construct_description_line(obj)
-        description_line = list(
-            map(
-                lambda line: line.replace("\n\n", "<br>" + indentation_items),
-                description_line_base,
-            )
-        )
+        if any("```" in line for line in description_line_base):
+            description_line = self._handle_code_blocks(description_line_base, indentation_items)
+        else:
+            description_line = [
+                f"<br>{indentation_items}".join(line.split("\n\n")) for line in description_line_base
+            ]
 
         # Add full line to output
         description_line = " ".join(description_line)

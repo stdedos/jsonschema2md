@@ -1,6 +1,8 @@
 """Test jsonschema2md."""
 
 
+import textwrap
+
 import jsonschema2md
 
 
@@ -47,6 +49,61 @@ class TestParser:
             }
         ],
     }
+
+    def test_handle_code_blocks(self):
+        """Test is overfit to render ``text`` correctly as md"""
+        parser = jsonschema2md.Parser()
+
+        text = textwrap.dedent(
+            """\
+            Shorthand for
+            ```yaml
+              main: |
+                reveal_type({{ reveal_type }})
+            ```
+            Must be a syntactically valid Python expression.
+            """
+        )
+
+        expected = (
+            "Shorthand for\n"
+            "```yaml\n"
+            "  main: |\n"
+            "    reveal_type({{ reveal_type }})\n"
+            "```\n"
+            "Must be a syntactically valid Python expression.\n"
+        )
+
+        assert parser._handle_code_blocks([text], "  ") == [expected]
+
+    def test_handle_code_blocks2(self):
+        """Test is overfit to render ``text`` correctly as md"""
+        parser = jsonschema2md.Parser()
+
+        text = textwrap.dedent(
+            """\
+            Shorthand for
+
+            ```yaml
+              main: |
+                reveal_type({{ reveal_type }})
+            ```
+
+            Must be a syntactically valid Python expression.
+            """
+        )
+
+        expected = (
+            "Shorthand for<br>\n"
+            "  ```yaml\n"
+            "  main: |\n"
+            "    reveal_type({{ reveal_type }})\n"
+            "```\n"
+            "\n"
+            "Must be a syntactically valid Python expression.\n"
+        )
+
+        assert parser._handle_code_blocks([text], "  ") == [expected]
 
     def test_construct_description_line(self):
         parser = jsonschema2md.Parser()
@@ -174,7 +231,6 @@ class TestParser:
             {
                 "input": {
                     "description": "Shorthand for\n```yaml\n  main: |\n    reveal_type({{ reveal_type }})\n```\nMust be a syntactically valid Python expression.\n",
-                    "examples": ["1", 1, True, "sys.version_info"],
                 },
                 "add_type": False,
                 "expected_output": (
